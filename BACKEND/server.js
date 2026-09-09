@@ -1,12 +1,17 @@
+"use strict";
+
 // ============================================================
 // SIG ÉCOLES DE BAMAKO
 // Backend Node.js / Express
 // Connexion : PostgreSQL → API REST → Frontend
 // ============================================================
 
+// Charger les variables du fichier .env AVANT db.js
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
-const { Pool } = require("pg");
+const pool = require("./db");
 
 const app = express();
 
@@ -14,15 +19,7 @@ const app = express();
 // CONFIGURATION
 // ============================================================
 
-const PORT = 4000;
-
-const pool = new Pool({
-    host: "localhost",
-    port: 5433,
-    database: "ecoles_bamako",
-    user: "postgres",
-    password: "yaya"
-});
+const PORT = process.env.PORT || 4000;
 
 // ============================================================
 // MIDDLEWARE
@@ -31,23 +28,34 @@ const pool = new Pool({
 app.use(cors());
 app.use(express.json());
 
-// Permet de servir ton frontend si index.html est dans "public"
-app.use(express.static("public"));
+// ============================================================
+// ROUTE PRINCIPALE
+// ============================================================
+
+app.get("/api", (req, res) => {
+    res.json({
+        success: true,
+        message: "API SIG Écoles de Bamako opérationnelle",
+        version: "1.0.0"
+    });
+});
 
 // ============================================================
-// TEST DE CONNEXION POSTGRESQL
+// TEST CONNEXION POSTGRESQL
 // ============================================================
 
 app.get("/api/test-db", async (req, res) => {
 
     try {
 
-        const result = await pool.query("SELECT NOW() AS heure");
+        const result = await pool.query("SELECT NOW() AS date_serveur");
 
         res.json({
             success: true,
             message: "Connexion PostgreSQL réussie",
-            serveur: result.rows[0].heure
+            database: process.env.DB_NAME || "ecoles_bamako",
+            server: (process.env.DB_HOST || "127.0.0.1") + ":" + (process.env.DB_PORT || 5433),
+            date_serveur: result.rows[0].date_serveur
         });
 
     } catch (error) {
@@ -59,18 +67,20 @@ app.get("/api/test-db", async (req, res) => {
             message: "Impossible de se connecter à PostgreSQL",
             error: error.message
         });
+
     }
+
 });
 
 // ============================================================
-// GET — TOUTES LES ÉCOLES
+// RÉCUPÉRER TOUTES LES ÉCOLES
 // ============================================================
 
 app.get("/api/ecoles", async (req, res) => {
 
     try {
 
-        const query = `
+        const result = await pool.query(`
             SELECT
                 id_ecole,
                 nom_ecole,
@@ -89,9 +99,7 @@ app.get("/api/ecoles", async (req, res) => {
                 date_collecte
             FROM public.ecoles
             ORDER BY nom_ecole ASC
-        `;
-
-        const result = await pool.query(query);
+        `);
 
         res.json({
             success: true,
@@ -105,14 +113,16 @@ app.get("/api/ecoles", async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: "Erreur lors de la récupération des écoles",
+            message: "Impossible de charger les écoles",
             error: error.message
         });
+
     }
+
 });
 
 // ============================================================
-// GET — UNE ÉCOLE PAR ID
+// RÉCUPÉRER UNE ÉCOLE PAR SON ID
 // ============================================================
 
 app.get("/api/ecoles/:id", async (req, res) => {
@@ -121,7 +131,8 @@ app.get("/api/ecoles/:id", async (req, res) => {
 
         const { id } = req.params;
 
-        const query = `
+        const result = await pool.query(
+            `
             SELECT
                 id_ecole,
                 nom_ecole,
@@ -140,10 +151,9 @@ app.get("/api/ecoles/:id", async (req, res) => {
                 date_collecte
             FROM public.ecoles
             WHERE id_ecole = $1
-            LIMIT 1
-        `;
-
-        const result = await pool.query(query, [id]);
+            `,
+            [id]
+        );
 
         if (result.rows.length === 0) {
 
@@ -151,6 +161,7 @@ app.get("/api/ecoles/:id", async (req, res) => {
                 success: false,
                 message: "École introuvable"
             });
+
         }
 
         res.json({
@@ -164,200 +175,38 @@ app.get("/api/ecoles/:id", async (req, res) => {
 
         res.status(500).json({
             success: false,
-            message: "Erreur lors de la recherche",
+            message: "Erreur lors de la récupération de l'école",
             error: error.message
         });
+
     }
+
 });
 
 // ============================================================
-// GET — STATISTIQUES
-// ============================================================
-
-app.get("/api/statistiques", async (req, res) => {
-
-    try {
-
-        const query = `
-            SELECT
-                COUNT(*) AS total_ecoles,
-
-                COALESCE(SUM(effectif_total), 0) AS total_eleves,
-
-                COALESCE(SUM(nombre_classes), 0) AS total_classes,
-
-                COUNT(*) FILTER (
-                    WHERE LOWER(statut_fonctionnement) = 'fonctionnel'
-                ) AS ecoles_fonctionnelles
-
-            FROM public.ecoles
-        `;
-
-        const result = await pool.query(query);
-
-        const stats = result.rows[0];
-
-        const total = Number(stats.total_ecoles);
-        const fonctionnelles = Number(stats.ecoles_fonctionnelles);
-
-        const tauxFonctionnel =
-            total > 0
-                ? ((fonctionnelles / total) * 100).toFixed(1)
-                : "0.0";
-
-        res.json({
-            success: true,
-            data: {
-                total_ecoles: total,
-                total_eleves: Number(stats.total_eleves),
-                total_classes: Number(stats.total_classes),
-                ecoles_fonctionnelles: fonctionnelles,
-                taux_fonctionnel: Number(tauxFonctionnel)
-            }
-        });
-
-    } catch (error) {
-
-        console.error("Erreur statistiques :", error.message);
-
-        res.status(500).json({
-            success: false,
-            message: "Erreur lors du calcul des statistiques",
-            error: error.message
-        });
-    }
-});
-
-// ============================================================
-// GET — ÉCOLES PAR COMMUNE
-// ============================================================
-
-app.get("/api/statistiques/communes", async (req, res) => {
-
-    try {
-
-        const query = `
-            SELECT
-                commune,
-                COUNT(*) AS nombre_ecoles,
-                COALESCE(SUM(effectif_total), 0) AS nombre_eleves,
-                COALESCE(SUM(nombre_classes), 0) AS nombre_classes
-            FROM public.ecoles
-            GROUP BY commune
-            ORDER BY commune ASC
-        `;
-
-        const result = await pool.query(query);
-
-        res.json({
-            success: true,
-            data: result.rows
-        });
-
-    } catch (error) {
-
-        console.error("Erreur statistiques communes :", error.message);
-
-        res.status(500).json({
-            success: false,
-            message: "Erreur statistiques communes",
-            error: error.message
-        });
-    }
-});
-
-// ============================================================
-// GET — ÉCOLES PAR TYPE
-// ============================================================
-
-app.get("/api/statistiques/types", async (req, res) => {
-
-    try {
-
-        const query = `
-            SELECT
-                type_ecole,
-                COUNT(*) AS nombre_ecoles
-            FROM public.ecoles
-            GROUP BY type_ecole
-            ORDER BY type_ecole ASC
-        `;
-
-        const result = await pool.query(query);
-
-        res.json({
-            success: true,
-            data: result.rows
-        });
-
-    } catch (error) {
-
-        console.error("Erreur statistiques types :", error.message);
-
-        res.status(500).json({
-            success: false,
-            message: "Erreur statistiques types",
-            error: error.message
-        });
-    }
-});
-
-// ============================================================
-// GET — ÉCOLES PAR NIVEAU
-// ============================================================
-
-app.get("/api/statistiques/niveaux", async (req, res) => {
-
-    try {
-
-        const query = `
-            SELECT
-                niveau,
-                COUNT(*) AS nombre_ecoles
-            FROM public.ecoles
-            GROUP BY niveau
-            ORDER BY niveau ASC
-        `;
-
-        const result = await pool.query(query);
-
-        res.json({
-            success: true,
-            data: result.rows
-        });
-
-    } catch (error) {
-
-        console.error("Erreur statistiques niveaux :", error.message);
-
-        res.status(500).json({
-            success: false,
-            message: "Erreur statistiques niveaux",
-            error: error.message
-        });
-    }
-});
-
-// ============================================================
-// RECHERCHE D'ÉCOLES
+// RECHERCHE
 // ============================================================
 
 app.get("/api/recherche", async (req, res) => {
 
     try {
 
-        const recherche = (req.query.q || "").trim();
+        const q = String(req.query.q || "").trim();
 
-        if (!recherche) {
+        if (!q) {
 
             return res.json({
                 success: true,
                 total: 0,
                 data: []
             });
+
         }
 
-        const query = `
+        const recherche = `%${q}%`;
+
+        const result = await pool.query(
+            `
             SELECT
                 id_ecole,
                 nom_ecole,
@@ -378,14 +227,16 @@ app.get("/api/recherche", async (req, res) => {
             WHERE
                 nom_ecole ILIKE $1
                 OR id_ecole ILIKE $1
+                OR type_ecole ILIKE $1
+                OR niveau ILIKE $1
                 OR commune ILIKE $1
                 OR quartier ILIKE $1
                 OR adresse ILIKE $1
+                OR statut_fonctionnement ILIKE $1
             ORDER BY nom_ecole ASC
-            LIMIT 500
-        `;
-
-        const result = await pool.query(query, [`%${recherche}%`]);
+            `,
+            [recherche]
+        );
 
         res.json({
             success: true,
@@ -402,48 +253,224 @@ app.get("/api/recherche", async (req, res) => {
             message: "Erreur lors de la recherche",
             error: error.message
         });
+
     }
+
 });
 
 // ============================================================
-// ROUTE PRINCIPALE
+// STATISTIQUES GÉNÉRALES
 // ============================================================
 
-app.get("/api", (req, res) => {
+app.get("/api/statistiques", async (req, res) => {
 
-    res.json({
-        nom: "SIG Écoles de Bamako",
-        version: "1.0.0",
-        status: "API opérationnelle",
-        endpoints: [
-            "/api/test-db",
-            "/api/ecoles",
-            "/api/ecoles/:id",
-            "/api/statistiques",
-            "/api/statistiques/communes",
-            "/api/statistiques/types",
-            "/api/statistiques/niveaux",
-            "/api/recherche?q=..."
-        ]
-    });
+    try {
+
+        const result = await pool.query(`
+            SELECT
+
+                COUNT(*) AS total_ecoles,
+
+                COALESCE(
+                    SUM(effectif_total),
+                    0
+                ) AS total_eleves,
+
+                COALESCE(
+                    SUM(nombre_classes),
+                    0
+                ) AS total_classes,
+
+                COUNT(*) FILTER (
+                    WHERE LOWER(TRIM(statut_fonctionnement))
+                    = 'fonctionnel'
+                ) AS ecoles_fonctionnelles,
+
+                COUNT(*) FILTER (
+                    WHERE LOWER(TRIM(statut_fonctionnement))
+                    = 'non fonctionnel'
+                ) AS ecoles_non_fonctionnelles
+
+            FROM public.ecoles
+        `);
+
+        const data = result.rows[0];
+
+        const total = Number(data.total_ecoles || 0);
+        const fonctionnelles =
+            Number(data.ecoles_fonctionnelles || 0);
+
+        const taux =
+            total > 0
+                ? (fonctionnelles / total) * 100
+                : 0;
+
+        res.json({
+            success: true,
+
+            data: {
+                total_ecoles: total,
+                total_eleves: Number(data.total_eleves || 0),
+                total_classes: Number(data.total_classes || 0),
+                ecoles_fonctionnelles: fonctionnelles,
+                ecoles_non_fonctionnelles:
+                    Number(data.ecoles_non_fonctionnelles || 0),
+                taux_fonctionnement:
+                    Number(taux.toFixed(2))
+            }
+        });
+
+    } catch (error) {
+
+        console.error("Erreur statistiques :", error.message);
+
+        res.status(500).json({
+            success: false,
+            message: "Impossible de récupérer les statistiques",
+            error: error.message
+        });
+
+    }
+
+});
+
+// ============================================================
+// STATISTIQUES PAR COMMUNE
+// ============================================================
+
+app.get("/api/statistiques/communes", async (req, res) => {
+
+    try {
+
+        const result = await pool.query(`
+            SELECT
+                commune,
+                COUNT(*) AS total_ecoles,
+                COALESCE(SUM(effectif_total), 0) AS total_eleves,
+                COALESCE(SUM(nombre_classes), 0) AS total_classes
+            FROM public.ecoles
+            GROUP BY commune
+            ORDER BY total_ecoles DESC
+        `);
+
+        res.json({
+            success: true,
+            total: result.rows.length,
+            data: result.rows
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Erreur statistiques communes :",
+            error.message
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Impossible de récupérer les statistiques par commune",
+            error: error.message
+        });
+
+    }
+
+});
+
+// ============================================================
+// STATISTIQUES PAR TYPE
+// ============================================================
+
+app.get("/api/statistiques/types", async (req, res) => {
+
+    try {
+
+        const result = await pool.query(`
+            SELECT
+                type_ecole,
+                COUNT(*) AS total_ecoles
+            FROM public.ecoles
+            GROUP BY type_ecole
+            ORDER BY total_ecoles DESC
+        `);
+
+        res.json({
+            success: true,
+            total: result.rows.length,
+            data: result.rows
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Erreur statistiques types :",
+            error.message
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Impossible de récupérer les statistiques par type",
+            error: error.message
+        });
+
+    }
+
+});
+
+// ============================================================
+// STATISTIQUES PAR NIVEAU
+// ============================================================
+
+app.get("/api/statistiques/niveaux", async (req, res) => {
+
+    try {
+
+        const result = await pool.query(`
+            SELECT
+                niveau,
+                COUNT(*) AS total_ecoles
+            FROM public.ecoles
+            GROUP BY niveau
+            ORDER BY total_ecoles DESC
+        `);
+
+        res.json({
+            success: true,
+            total: result.rows.length,
+            data: result.rows
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Erreur statistiques niveaux :",
+            error.message
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Impossible de récupérer les statistiques par niveau",
+            error: error.message
+        });
+
+    }
+
 });
 
 // ============================================================
 // GESTION DES ERREURS
 // ============================================================
 
-app.use((err, req, res, next) => {
+app.use((req, res) => {
 
-    console.error("Erreur serveur :", err);
-
-    res.status(500).json({
+    res.status(404).json({
         success: false,
-        message: "Erreur interne du serveur"
+        message: "Route API introuvable"
     });
+
 });
 
 // ============================================================
-// DÉMARRAGE DU SERVEUR
+// DÉMARRAGE SERVEUR
 // ============================================================
 
 app.listen(PORT, () => {
@@ -458,5 +485,6 @@ app.listen(PORT, () => {
     console.log(`Stats : http://localhost:${PORT}/api/statistiques`);
     console.log("==============================================");
     console.log("");
+
 });
 
