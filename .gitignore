@@ -1,0 +1,21 @@
+# Node.js
+node_modules/
+**/node_modules/
+
+# Variables d'environnement
+.env
+**/.env
+
+# Python
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Fichiers système
+.DS_Store
+Thumbs.db

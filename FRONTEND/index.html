@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>SIG · Écoles de Bamako — Portail géospatial</title>
+
+  <!-- =========================
+       FONT AWESOME
+  ========================== -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  >
+
+  <!-- =========================
+       GOOGLE FONTS
+  ========================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- =========================
+       LEAFLET
+  ========================== -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"
+  >
+
+  <!-- =========================
+       CSS DU PROJET
+  ========================== -->
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<!-- =========================================================
+     PAGE D'ACCUEIL
+========================================================= -->
+
+<div id="homeScreen">
+
+  <div class="home-bg" id="homeBg">
+
+    <div
+      class="home-bg-fallback"
+      aria-hidden="true">
+    </div>
+
+    <video
+      class="cinematic-video"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      aria-hidden="true">
+
+      <source
+        src="cinematic.mp4"
+        type="video/mp4">
+
+    </video>
+
+  </div>
+
+
+  <!-- ================= HEADER ACCUEIL ================= -->
+
+  <header class="home-header">
+
+    <div class="home-logo">
+      <span class="wordmark">
+        SIG · Écoles Bamako
+      </span>
+    </div>
+
+
+    <nav
+      class="home-nav-links"
+      aria-label="Navigation principale">
+
+      <button
+        type="button"
+        class="active"
+        data-nav="accueil">
+
+        Accueil
+
+      </button>
+
+      <button
+        type="button"
+        data-nav="carte">
+
+        Carte
+
+      </button>
+
+      <button
+        type="button"
+        data-nav="stats">
+
+        Statistiques
+
+      </button>
+
+      <button
+        type="button"
+        data-nav="tableau">
+
+        Tableau
+
+      </button>
+
+    </nav>
+
+
+    <div class="home-cta-desktop">
+
+      <button
+        type="button"
+        id="homeModeIndicator"
+        aria-live="polite">
+
+        <svg viewBox="0 0 24 24">
+          <circle
+            cx="12"
+            cy="12"
+            r="4">
+          </circle>
+
+          <path
+            d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4">
+          </path>
+        </svg>
+
+        <span id="homeModeIndicatorText">
+          Mode public
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        id="homeAdminLink">
+
+        <svg viewBox="0 0 24 24">
+
+          <circle
+            cx="12"
+            cy="8"
+            r="3.4">
+          </circle>
+
+          <path
+            d="M4.5 20c1.4-3.6 4.4-5.6 7.5-5.6s6.1 2 7.5 5.6">
+          </path>
+
+        </svg>
+
+        <span id="homeAdminLinkText">
+          Connexion
+        </span>
+
+      </button>
+
+    </div>
+
+
+    <button
+      class="home-burger"
+      id="homeBurger"
+      aria-label="Ouvrir le menu"
+      aria-expanded="false">
+
+      <span></span>
+      <span></span>
+      <span></span>
+
+    </button>
+
+  </header>
+
+
+  <!-- ================= MENU MOBILE ================= -->
+
+  <div
+    class="home-mobile-menu"
+    id="homeMobileMenu">
+
+    <button
+      type="button"
+      data-nav="accueil">
+
+      Accueil
+
+    </button>
+
+    <button
+      type="button"
+      data-nav="carte">
+
+      Carte
+
+    </button>
+
+    <button
+      type="button"
+      data-nav="stats">
+
+      Statistiques
+
+    </button>
+
+    <button
+      type="button"
+      data-nav="tableau">
+
+      Tableau
+
+    </button>
+
+    <button
+      type="button"
+      class="mm-admin"
+      id="homeAdminLinkMobile">
+
+      Connexion
+
+    </button>
+
+  </div>
+
+
+  <!-- ================= CONTENU ACCUEIL ================= -->
+
+  <main class="home-main">
+
+    <div class="home-copy">
+
+      <p class="home-eyebrow">
+        Système d'information géographique
+      </p>
+      <h1
+        class="home-headline"
+        id="homeHeadline">
+
+        <span id="homeHeadlineText"></span>
+
+        <span
+          class="cursor animate-blink"
+          id="homeHeadlineCursor">
+        </span>
+
+      </h1>
+
+      <p class="home-desc">
+
+        Explorez la répartition des établissements scolaires
+        dans le District de Bamako et accédez à des données
+        fiables pour une meilleure prise de décision.
+
+      </p>
+
+
+      <div class="home-cta-row">
+
+        <button
+          type="button"
+          class="btn"
+          id="btnEnterPortal">
+
+          Explorer la carte&nbsp; →
+
+        </button>
+
+        <button
+          type="button"
+          class="btn ghost-home"
+          id="btnEnterStats">
+
+          Voir les statistiques&nbsp; →
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- ================= BAS DE PAGE ================= -->
+
+  <div class="home-bottom-bar">
+
+    <div class="home-bottom-item">
+
+      <b>
+        <i class="fa-solid fa-rotate"></i>
+      </b>
+
+      <div>
+
+        <strong>
+          Données mises à jour
+        </strong>
+
+        <span>
+          Depuis PostgreSQL
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="home-bottom-item">
+
+      <b>
+        <i class="fa-solid fa-location-dot"></i>
+      </b>
+
+      <div>
+
+        <strong>
+          Couverture
+        </strong>
+
+        <span>
+          District de Bamako
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="home-bottom-item">
+
+      <b>
+        <i class="fa-solid fa-database"></i>
+      </b>
+
+      <div>
+
+        <strong>
+          Source
+        </strong>
+
+        <span>
+          PostgreSQL
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="home-bottom-item">
+
+      <b>
+        <i class="fa-solid fa-circle-check"></i>
+      </b>
+
+      <div>
+
+        <strong>
+          Fiabilité
+        </strong>
+
+        <span>
+          Données centralisées
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     BARRE SUPERIEURE DU PORTAIL
+========================================================= -->
+
+<div class="top-right">
+
+  <button
+    class="btn small ghost"
+    id="btnBackHome"
+    title="Retour à l'accueil">
+
+    ←
+    <span class="btn-label">
+      Portail
+    </span>
+
+  </button>
+
+
+  <div
+    class="coord-readout"
+    id="coordReadout">
+
+    lat —.—— &nbsp;/&nbsp; lon —.——
+
+  </div>
+
+
+  <div
+    class="status-pill"
+    id="statusPill">
+
+    <span class="led"></span>
+
+    <span id="statusText">
+      Connexion PostgreSQL...
+    </span>
+
+  </div>
+
+
+  <div
+    class="mode-switch"
+    id="topbarModeSwitch"
+    role="group"
+    aria-label="Basculer entre vue publique et vue admin">
+
+    <button
+      type="button"
+      data-role="public"
+      class="active">
+
+      Vue publique
+
+    </button>
+
+    <button
+      type="button"
+      data-role="admin">
+
+      Vue admin
+
+    </button>
+
+  </div>
+
+
+  <!-- ================= OUTILS ADMIN ================= -->
+
+  <div
+    class="theme-tools admin-only"
+    title="Changer la couleur de fond de la carte">
+
+    <label
+      class="color-btn"
+      aria-label="Couleur de fond de la carte">
+
+      <input
+        type="color"
+        id="bgColorPicker"
+        value="#eef1f5"
+        title="Couleur de fond de la carte">
+
+    </label>
+
+
+    <button
+      class="btn small ghost"
+      id="btnResetBg">
+
+      Fond carte par défaut
+
+    </button>
+
+  </div>
+
+
+  <!-- ================= BOUTON ADMIN ================= -->
+
+  <button
+    class="btn admin-only"
+    id="btnConnect">
+
+    Gestion des données
+
+  </button>
+
+</div>
+
+
+<!-- =========================================================
+     DRAPEAU DU MALI
+========================================================= -->
+
+<div
+  id="flagStrip"
+  aria-hidden="true">
+
+  <span
+    class="flag-band flag-green">
+  </span>
+
+  <span
+    class="flag-band flag-yellow">
+  </span>
+
+  <span
+    class="flag-band flag-red">
+  </span>
+
+</div>
+
+
+<!-- =========================================================
+     TICKER KPI
+========================================================= -->
+
+<div id="ticker">
+
+  <div class="ticker-stats">
+
+    <div class="ticker-stat">
+
+      <span class="tk-label">
+        Écoles
+      </span>
+
+      <span
+        class="tk-value"
+        id="tkEcoles">
+
+        0
+
+      </span>
+
+    </div>
+
+
+    <div class="ticker-stat">
+
+      <span class="tk-label">
+        Fonctionnelles
+      </span>
+
+      <span
+        class="tk-value ok"
+        id="tkFonct">
+
+        0
+
+      </span>
+
+    </div>
+
+
+    <div class="ticker-stat">
+
+      <span class="tk-label">
+        Non fonctionnelles
+      </span>
+
+      <span
+        class="tk-value bad"
+        id="tkNonFonct">
+
+        0
+
+      </span>
+
+    </div>
+
+
+    <div class="ticker-stat">
+
+      <span class="tk-label">
+        Élèves
+      </span>
+
+      <span
+        class="tk-value"
+        id="tkEleves">
+
+        0
+
+      </span>
+
+    </div>
+
+
+    <div class="ticker-stat">
+
+      <span class="tk-label">
+        Classes
+      </span>
+
+      <span
+        class="tk-value"
+        id="tkClasses">
+
+        0
+
+      </span>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     APPLICATION PRINCIPALE
+========================================================= -->
+
+<div id="app">
+
+
+  <!-- ================= CARTE ================= -->
+
+  <div id="map"></div>
+
+
+  <!-- ================= ETAT VIDE ================= -->
+
+  <div
+    class="map-empty-state"
+    id="mapEmptyState">
+
+    <div class="map-empty-inner">
+
+      <strong>
+        Aucune donnée chargée
+      </strong>
+
+      <p>
+
+        Les données du portail sont récupérées
+        depuis PostgreSQL via l'API du serveur.
+
+        L'administrateur peut actualiser les données
+        depuis le panneau de gestion.
+
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================= FILTRES MOBILE ================= -->
+
+  <button
+    type="button"
+    class="btn primary"
+    id="btnOpenFilters"
+    aria-label="Ouvrir les filtres">
+
+    ☰ Filtres
+
+  </button>
+
+
+  <!-- =======================================================
+       PANNEAU FILTRES
+  ======================================================== -->
+
+  <div
+    class="panel"
+    id="panel-filters">
+
+    <div class="panel-head">
+
+      <div>
+
+        <p class="eyebrow">
+          Exploration
+        </p>
+
+        <h2>
+          Filtrer le réseau scolaire
+        </h2>
+
+      </div>
+
+      <span
+        class="detail-close"
+        id="filtersClose"
+        role="button"
+        tabindex="0"
+        aria-label="Fermer les filtres">
+
+        ✕
+
+      </span>
+
+    </div>
+
+
+    <!-- ONGLETS -->
+
+    <div
+      class="tabs"
+      style="margin:12px 14px 0;"
+      role="tablist">
+
+      <div
+        class="tab active"
+        data-tab="carte"
+        role="tab"
+        tabindex="0"
+        aria-selected="true">
+
+        Carte
+
+      </div>
+
+      <div
+        class="tab"
+        data-tab="tableau"
+        role="tab"
+        tabindex="0"
+        aria-selected="false">
+
+        Tableau
+
+      </div>
+
+      <div
+        class="tab"
+        data-tab="stats"
+        role="tab"
+        tabindex="0"
+        aria-selected="false">
+
+        Stats
+
+      </div>
+
+    </div>
+
+
+    <div class="panel-body">
+
+
+      <!-- RECHERCHE -->
+
+      <div class="field">
+
+        <label for="searchInput">
+          Recherche
+        </label>
+
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Nom, quartier, adresse…"
+          autocomplete="off">
+
+      </div>
+
+
+      <!-- COMMUNES -->
+
+      <div class="field">
+
+        <label>
+          Commune
+        </label>
+
+        <div
+          class="checklist"
+          id="listCommune"
+          role="group"
+          aria-label="Filtrer par commune">
+        </div>
+
+      </div>
+
+
+      <!-- QUARTIERS -->
+
+      <div class="field">
+
+        <label>
+          Quartier
+        </label>
+
+        <div
+          class="checklist"
+          id="listQuartier"
+          role="group"
+          aria-label="Filtrer par quartier">
+        </div>
+
+      </div>
+
+
+      <!-- TYPES -->
+
+      <div class="field">
+
+        <label>
+          Type d'établissement
+        </label>
+
+        <div
+          class="chiprow"
+          id="chipsType"
+          role="group"
+          aria-label="Filtrer par type d'établissement">
+        </div>
+
+      </div>
+
+
+      <!-- NIVEAUX -->
+
+      <div class="field">
+
+        <label>
+          Niveau
+        </label>
+
+        <div
+          class="chiprow"
+          id="chipsNiveau"
+          role="group"
+          aria-label="Filtrer par niveau">
+        </div>
+
+      </div>
+
+
+      <!-- STATUT -->
+
+      <div class="field">
+
+        <label>
+          Statut de fonctionnement
+        </label>
+
+        <div
+          class="chiprow"
+          id="chipsStatut"
+          role="group"
+          aria-label="Filtrer par statut de fonctionnement">
+        </div>
+
+      </div>
+
+
+      <!-- RESULTATS -->
+
+      <div class="filter-summary">
+
+        <span>
+          Résultat filtré
+        </span>
+
+        <strong id="filterCount">
+          0 / 0
+        </strong>
+
+      </div>
+
+
+      <!-- KPI -->
+
+      <div class="kpis">
+
+        <div class="kpi">
+
+          <div
+            class="n"
+            id="kpiTotal">
+
+            0
+
+          </div>
+
+          <div class="l">
+            Écoles
+          </div>
+
+        </div>
+
+
+        <div class="kpi">
+
+          <div
+            class="n"
+            id="kpiEffectif">
+
+            0
+
+          </div>
+
+          <div class="l">
+            Élèves
+          </div>
+
+        </div>
+
+
+        <div class="kpi">
+
+          <div
+            class="n"
+            id="kpiFonctionnel">
+
+            0%
+
+          </div>
+
+          <div class="l">
+            Fonctionnelles
+          </div>
+
+        </div>
+
+
+        <div class="kpi">
+
+          <div
+            class="n"
+            id="kpiCommunes">
+
+            0
+
+          </div>
+
+          <div class="l">
+            Communes
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <button
+        class="btn full"
+        style="margin-top:14px;"
+        id="btnResetFilters">
+
+        Réinitialiser les filtres
+
+      </button>
+
+
+      <button
+        class="btn full"
+        style="margin-top:7px;"
+        id="btnExport">
+
+        Exporter CSV (filtré)
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       PANNEAU DETAIL
+  ======================================================== -->
+
+  <div
+    class="panel"
+    id="panel-detail">
+
+    <div class="panel-head">
+
+      <div>
+
+        <p
+          class="eyebrow"
+          id="detailType">
+
+          —
+
+        </p>
+
+        <h2 id="detailName">
+          Sélectionner une école
+        </h2>
+
+      </div>
+
+      <span
+        class="detail-close"
+        id="detailClose"
+        role="button"
+        tabindex="0"
+        aria-label="Fermer le détail">
+
+        ✕
+
+      </span>
+
+    </div>
+
+    <div
+      class="panel-body"
+      id="detailBody">
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       LEGENDE
+  ======================================================== -->
+
+  <div
+    class="panel"
+    id="legend">
+
+    <div class="legend-item">
+
+      <span
+        class="legend-dot"
+        style="background:var(--flag-green)">
+      </span>
+
+      Public
+
+    </div>
+
+
+    <div class="legend-item">
+
+      <span
+        class="legend-dot"
+        style="background:var(--flag-yellow)">
+      </span>
+
+      Privé
+
+    </div>
+
+
+    <div class="legend-item">
+
+      <span
+        class="legend-dot"
+        style="background:var(--flag-red)">
+      </span>
+
+      Communautaire
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       ITINERAIRE
+  ======================================================== -->
+
+  <div
+    class="panel"
+    id="panel-route">
+
+    <div class="panel-head">
+
+      <div>
+
+        <p class="eyebrow">
+          Itinéraire
+        </p>
+
+        <h2 id="routeSchoolName">
+          —
+        </h2>
+
+      </div>
+
+      <span
+        class="detail-close"
+        id="routeClose"
+        role="button"
+        tabindex="0"
+        aria-label="Fermer l'itinéraire">
+
+        ✕
+
+      </span>
+
+    </div>
+
+
+    <div
+      class="panel-body"
+      id="routeBody">
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       BOUTON DRAWER
+  ======================================================== -->
+
+  <button
+    class="btn primary"
+    id="drawer-toggle">
+
+    Ouvrir analyse / tableau ▲
+
+  </button>
+
+
+  <!-- =======================================================
+       DRAWER
+  ======================================================== -->
+
+  <div id="drawer">
+
+
+    <div class="drawer-head">
+
+      <h2 id="drawerTitle">
+        Tableau des établissements
+      </h2>
+
+      <span
+        class="detail-close"
+        id="drawerClose"
+        role="button"
+        tabindex="0"
+        aria-label="Fermer le tiroir">
+
+        ✕
+
+      </span>
+
+    </div>
+
+
+    <!-- ================= TABLEAU ================= -->
+
+    <div
+      class="drawer-body"
+      id="drawerBodyTable">
+
+      <table id="dataTable">
+
+        <thead>
+
+          <tr>
+
+            <th data-key="id_ecole">
+              ID
+            </th>
+
+            <th data-key="nom_ecole">
+              Nom
+            </th>
+
+            <th data-key="type_ecole">
+              Type
+            </th>
+
+            <th data-key="niveau">
+              Niveau
+            </th>
+
+            <th data-key="commune">
+              Commune
+            </th>
+
+            <th data-key="quartier">
+              Quartier
+            </th>
+
+            <th data-key="effectif_total">
+              Effectif
+            </th>
+
+            <th data-key="nombre_classes">
+              Classes
+            </th>
+
+            <th data-key="statut_fonctionnement">
+              Statut
+            </th>
+
+            <th data-key="annee_creation">
+              Créée
+            </th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="tableBody">
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- ================= STATISTIQUES ================= -->
+
+    <div
+      class="drawer-body"
+      id="drawerBodyStats"
+      style="display:none;">
+
+      <div class="stats-dashboard">
+
+
+        <!-- KPI STATS -->
+
+        <div class="stats-kpis">
+
+
+          <div class="stat-card">
+
+            <div class="stat-label">
+              Établissements
+            </div>
+
+            <div
+              class="stat-value"
+              id="statSchools">
+
+              0
+
+            </div>
+
+            <div class="stat-sub">
+              réseau analysé
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="stat-label">
+              Élèves
+            </div>
+
+            <div
+              class="stat-value"
+              id="statStudents">
+
+              0
+
+            </div>
+
+            <div class="stat-sub">
+              effectif total
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="stat-label">
+              Classes
+            </div>
+
+            <div
+              class="stat-value"
+              id="statClasses">
+
+              0
+
+            </div>
+
+            <div class="stat-sub">
+              classes recensées
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="stat-label">
+              Fonctionnement
+            </div>
+
+            <div
+              class="stat-value"
+              id="statFunctional">
+
+              0%
+
+            </div>
+
+            <div class="stat-sub">
+              écoles fonctionnelles
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="stat-label">
+              Élèves / école
+            </div>
+
+            <div
+              class="stat-value"
+              id="statAvgSchool">
+
+              0
+
+            </div>
+
+            <div class="stat-sub">
+              moyenne
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="stat-label">
+              Élèves / classe
+            </div>
+
+            <div
+              class="stat-value"
+              id="statAvgClass">
+
+              0
+
+            </div>
+
+            <div class="stat-sub">
+              ratio moyen
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- GRAPHIQUES -->
+
+        <div class="stats-grid">
+
+
+          <div class="pro-chart wide">
+
+            <h3>
+              Établissements par commune
+            </h3>
+
+            <div class="chart-canvas">
+
+              <canvas id="chartCommune"></canvas>
+
+            </div>
+
+          </div>
+
+
+          <div class="pro-chart">
+
+            <h3>
+              Répartition par type
+            </h3>
+
+            <div class="chart-canvas">
+
+              <canvas id="chartType"></canvas>
+
+            </div>
+
+          </div>
+
+
+          <div class="pro-chart">
+
+            <h3>
+              Élèves par commune
+            </h3>
+
+            <div class="chart-canvas">
+
+              <canvas id="chartStudentsCommune"></canvas>
+
+            </div>
+
+          </div>
+
+
+          <div class="pro-chart">
+
+            <h3>
+              Classes par commune
+            </h3>
+
+            <div class="chart-canvas">
+
+              <canvas id="chartClassesCommune"></canvas>
+
+            </div>
+
+          </div>
+
+
+          <div class="pro-chart">
+
+            <h3>
+              Écoles par niveau
+            </h3>
+
+            <div class="chart-canvas">
+
+              <canvas id="chartNiveau"></canvas>
+
+            </div>
+
+          </div>
+
+
+          <div class="pro-chart">
+
+            <h3>
+              Élèves par niveau
+            </h3>
+
+            <div class="chart-canvas">
+
+              <canvas id="chartNiveauEff"></canvas>
+
+            </div>
+
+          </div>
+
+
+          <div class="pro-chart">
+
+            <h3>
+              Top communes — écoles
+            </h3>
+
+            <div class="chart-canvas">
+
+              <div
+                class="rank-list"
+                id="rankCommunes">
+              </div>
+
+            </div>
+
+          </div>
+
+
+        </div>
+
+
+        <!-- ANALYSE -->
+
+        <div class="insights">
+
+          <div class="insights-title">
+            Analyse territoriale automatique
+          </div>
+
+          <div
+            class="insights-list"
+            id="insightsList">
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     PAGE PLEIN ECRAN — DETAIL ECOLE
+========================================================= -->
+
+<div
+  id="schoolPage"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="schoolPageName">
+
+
+  <div class="school-page-head">
+
+
+    <button
+      type="button"
+      class="btn small sp-back"
+      id="btnSchoolPageBack">
+
+      ← Retour à la carte
+
+    </button>
+
+
+    <div class="school-page-titles">
+
+      <p
+        class="eyebrow"
+        id="schoolPageType">
+
+        —
+
+      </p>
+
+      <h2 id="schoolPageName">
+        École
+      </h2>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="btn small"
+      id="btnSchoolPageRoute">
+
+      📍 Itinéraire
+
+    </button>
+
+  </div>
+
+
+  <div class="school-page-body">
+
+    <div class="school-page-card">
+
+      <div id="schoolPageBody">
+      </div>
+
+
+      <div class="school-page-actions">
+
+        <button
+          type="button"
+          class="btn"
+          id="btnSchoolPageLocate">
+
+          Localiser sur la carte
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn ghost"
+          id="btnSchoolPageClose2">
+
+          Fermer
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     MODAL ADMIN — POSTGRESQL
+========================================================= -->
+
+<div
+  class="overlay"
+  id="overlay">
+
+
+  <div
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="dataModalTitle">
+
+
+    <!-- EN-TETE -->
+
+    <div class="modal-head">
+
+      <h2 id="dataModalTitle">
+        Gestion des données
+      </h2>
+
+
+      <span
+        class="detail-close"
+        id="modalClose"
+        role="button"
+        tabindex="0"
+        aria-label="Fermer la fenêtre">
+
+        ✕
+
+      </span>
+
+    </div>
+
+
+    <!-- CORPS -->
+
+    <div class="modal-body">
+
+
+      <p class="note">
+
+        Les données affichées par le portail proviennent
+        directement de PostgreSQL via l'API Node.js.
+
+      </p>
+
+
+      <p class="note">
+
+        <strong>
+          Source :
+        </strong>
+
+        PostgreSQL — base
+        <code>ecoles_bamako</code>
+
+      </p>
+
+
+      <!-- STATUT -->
+
+      <div class="field">
+
+        <label>
+          État de la connexion
+        </label>
+
+        <div
+          id="postgresStatus"
+          class="msg"
+          role="status"
+          aria-live="polite">
+
+          Vérification de la connexion...
+
+        </div>
+
+      </div>
+
+
+      <!-- NOMBRE ECOLES -->
+
+      <div class="field">
+
+        <label>
+          Nombre d'écoles disponibles
+        </label>
+
+        <div
+          id="postgresCount"
+          class="msg">
+
+          —
+
+        </div>
+
+      </div>
+
+
+      <!-- DONNEES -->
+
+      <div class="subhead">
+
+        Données disponibles
+
+      </div>
+
+
+      <div class="note">
+
+        <ul style="margin:8px 0 0 20px;">
+
+          <li>
+            Identifiant de l'école
+          </li>
+
+          <li>
+            Nom de l'école
+          </li>
+
+          <li>
+            Type d'école
+          </li>
+
+          <li>
+            Niveau
+          </li>
+
+          <li>
+            Commune
+          </li>
+
+          <li>
+            Quartier
+          </li>
+
+          <li>
+            Adresse
+          </li>
+
+          <li>
+            Latitude / Longitude
+          </li>
+
+          <li>
+            Effectif total
+          </li>
+
+          <li>
+            Nombre de classes
+          </li>
+
+          <li>
+            Statut de fonctionnement
+          </li>
+
+          <li>
+            Année de création
+          </li>
+
+          <li>
+            Source des données
+          </li>
+
+          <li>
+            Date de collecte
+          </li>
+
+        </ul>
+
+      </div>
+
+
+      <div
+        class="msg"
+        id="dataMsg"
+        role="status"
+        aria-live="polite">
+      </div>
+
+    </div>
+
+
+    <!-- PIED -->
+
+    <div
+      class="modal-foot"
+      style="justify-content:flex-end;">
+
+      <div
+        style="display:flex;gap:8px;flex-wrap:wrap;">
+
+
+        <button
+          class="btn"
+          id="btnTestPostgres"
+          type="button">
+
+          Tester la connexion
+
+        </button>
+
+
+        <button
+          class="btn"
+          id="btnRefreshPostgres"
+          type="button">
+
+          Actualiser
+
+        </button>
+
+
+        <button
+          class="btn primary"
+          id="btnDownloadPostgres"
+          type="button">
+
+          Télécharger les données
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     MODAL AUTHENTIFICATION ADMIN
+========================================================= -->
+
+<div
+  class="overlay"
+  id="adminAuthOverlay">
+
+
+  <div
+    class="modal"
+    style="width:360px;"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="adminAuthTitle">
+
+
+    <div class="modal-head">
+
+      <h2 id="adminAuthTitle">
+        Accès administrateur
+      </h2>
+
+
+      <span
+        class="detail-close"
+        id="adminAuthClose"
+        role="button"
+        tabindex="0"
+        aria-label="Fermer la fenêtre">
+
+        ✕
+
+      </span>
+
+    </div>
+
+
+    <div class="modal-body">
+
+      <div class="field">
+
+        <label for="adminPasswordInput">
+          Mot de passe
+        </label>
+
+        <input
+          type="password"
+          id="adminPasswordInput"
+          placeholder="Mot de passe administrateur"
+          autocomplete="off">
+
+      </div>
+
+
+      <div
+        class="msg"
+        id="adminAuthMsg"
+        role="status"
+        aria-live="polite">
+      </div>
+
+    </div>
+
+
+    <div class="modal-foot">
+
+      <button
+        class="btn ghost"
+        id="btnAdminAuthCancel">
+
+        Annuler
+
+      </button>
+
+
+      <button
+        class="btn primary"
+        id="btnAdminAuthSubmit">
+
+        Entrer
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     TOAST NOTIFICATIONS
+========================================================= -->
+
+<div
+  id="toastStack"
+  aria-live="polite">
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT EXTERNE
+========================================================= -->
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js">
+</script>
+
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js">
+</script>
+
+
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js">
+</script>
+
+
+<!-- SCRIPT PRINCIPAL -->
+
+<script src="script.js"></script>
+
+
+</body>
+</html>
+
