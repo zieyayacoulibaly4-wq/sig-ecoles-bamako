@@ -1,58 +1,142 @@
-# SIG Écoles de Bamako
+# 🗺️ SIG Écoles de Bamako
 
-Portail géospatial pour visualiser, filtrer et analyser les établissements scolaires de Bamako (Mali) : carte interactive, tableau, statistiques, et import de données au format CSV.
+**Système d’Information Géographique pour le géoréférencement, la visualisation et l’analyse des établissements scolaires de Bamako (Mali).**
 
-## Fonctionnalités
+Le projet **SIG Écoles de Bamako** est une plateforme géospatiale permettant de centraliser, synchroniser, visualiser et analyser les données des établissements scolaires de Bamako.
 
-- **Carte interactive (Leaflet)** : localisation des écoles avec marqueurs colorés par type d'établissement, popup détaillé, changement de fond de carte (OSM / satellite), géolocalisation de l'utilisateur, plein écran.
-- **Tableau des établissements** : liste complète, triable, avec accès à la fiche détail de chaque école.
-- **Statistiques** : nombre d'écoles, effectifs, taux de fonctionnalité, répartition par commune / type / niveau, classement des communes, analyse automatique.
-- **Filtres** : recherche libre, commune, quartier, type d'établissement, niveau, statut de fonctionnement.
-- **Import CSV** : chargement des données depuis un fichier CSV (aucune base de données requise), avec export du jeu de données filtré.
-- **Mode admin** : accès protégé par mot de passe pour importer un nouveau fichier de données.
-- **Itinéraire indicatif** : tracé simple entre la position de l'utilisateur et une école sélectionnée.
+La plateforme combine la collecte des données avec **KoboToolbox**, leur traitement avec **Python et PostgreSQL**, leur stockage en ligne avec **Supabase**, puis leur visualisation dans une interface web interactive.
 
-## Structure du projet
+---
 
+## 🎯 Objectif du projet
+
+L'objectif principal est de mettre en place une **base de données géospatiale des établissements scolaires de Bamako** afin de faciliter :
+
+* la localisation des établissements scolaires ;
+* l'analyse de leur répartition géographique ;
+* le suivi de leur fonctionnement ;
+* l'analyse des effectifs et des salles de classe ;
+* la comparaison entre les communes et les quartiers ;
+* la consultation rapide des informations d'une école ;
+* la production d'indicateurs utiles à la planification scolaire.
+
+Le système est conçu pour pouvoir évoluer avec l'ajout de nouvelles données provenant des collectes de terrain.
+
+---
+
+## 🏗️ Architecture du projet
+
+Le projet utilise une architecture basée sur plusieurs étapes :
+
+```text
+┌───────────────────┐
+│   KoboToolbox     │
+│ Collecte terrain  │
+└─────────┬─────────┘
+          │
+          │ Export des données
+          ▼
+┌───────────────────┐
+│       CSV         │
+│ Données exportées │
+└─────────┬─────────┘
+          │
+          │ Traitement Python
+          ▼
+┌───────────────────┐
+│    PostgreSQL     │
+│ Base locale       │
+└─────────┬─────────┘
+          │
+          │ Synchronisation
+          ▼
+┌───────────────────┐
+│     Supabase      │
+│ Base en ligne     │
+└─────────┬─────────┘
+          │
+          │ API
+          ▼
+┌───────────────────┐
+│     Frontend      │
+│ HTML/CSS/JS       │
+│ Leaflet + Charts  │
+└───────────────────┘
 ```
-├── index.html      # Structure de la page (accueil, carte, tableau, statistiques)
-├── app.js          # Logique de l'application (import CSV, filtres, carte, graphiques)
-├── style.css       # Mise en forme et responsive (desktop / mobile)
+
+### Rôle de chaque composant
+
+| Composant       | Rôle                                        |
+| --------------- | ------------------------------------------- |
+| **KoboToolbox** | Collecte des informations sur le terrain    |
+| **CSV**         | Format intermédiaire d'échange des données  |
+| **Python**      | Export, transformation et synchronisation   |
+| **PostgreSQL**  | Stockage et traitement local des données    |
+| **Supabase**    | Stockage en ligne et accès aux données      |
+| **Frontend**    | Visualisation et analyse des établissements |
+| **Leaflet**     | Carte interactive                           |
+| **Chart.js**    | Graphiques statistiques                     |
+
+---
+
+# 📁 Structure du projet
+
+```text
+PROJET-G/
+│
+├── backend/
+│   ├── config.py
+│   ├── main.py
+│   ├── requirements.txt
+│   │
+│   ├── database/
+│   │   ├── postgres.py
+│   │   ├── sync_postgres.py
+│   │   └── sync_supabase.py
+│   │
+│   └── kobo/
+│       └── kobo_export.py
+│
+├── frontend/
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
+│
+├── .gitignore
+└── README.md
 ```
 
-## Format du fichier CSV attendu
+---
 
-Le fichier importé doit contenir les colonnes suivantes (séparateur `;`) :
+# 🔄 Flux de données
 
-| Colonne                                | Description                          |
-|-----------------------------------------|---------------------------------------|
-| `id_ecole`                              | Identifiant unique de l'école        |
-| `Nom officiel de l'établissement`       | Nom de l'école                        |
-| `Type d'établissement`                  | Public / Privé / Communautaire        |
-| `Niveau`                                | Fondamental / Secondaire / Technique  |
-| `Commune`                               | Commune de Bamako                     |
-| `Quartier`                              | Quartier                              |
-| `Adresse / repère`                      | Adresse ou point de repère            |
-| `Position GPS de l'école`               | Coordonnées GPS ("lat lon ...")       |
-| `Effectif total (élèves)`               | Nombre total d'élèves                 |
-| `Nombre de salles de classe`            | Nombre de classes                     |
-| `Statut de fonctionnement`              | Fonctionnel / Non fonctionnel         |
-| `Année de création`                     | Année de création de l'école          |
-| `Source de la donnée`                   | Source de la collecte                 |
+## 1. Collecte avec KoboToolbox
 
-## Utilisation
+Les agents peuvent collecter les informations des établissements scolaires à partir du formulaire KoboToolbox.
 
-1. Ouvrez `index.html` dans un navigateur.
-2. Depuis l'écran d'accueil, connectez-vous en mode admin (bouton "Gestion des données") pour importer votre fichier CSV.
-3. Une fois les données chargées, explorez la carte, le tableau et les statistiques via le menu de navigation.
+Les données collectées comprennent notamment :
 
-## Technologies utilisées
+* identifiant de l'école ;
+* nom de l'établissement ;
+* type ;
+* niveau ;
+* commune ;
+* quartier ;
+* position GPS ;
+* effectif ;
+* nombre de salles ;
+* statut de fonctionnement ;
+* année de création ;
+* source de la donnée.
 
-- HTML / CSS / JavaScript (aucun framework, aucune dépendance de build)
-- [Leaflet](https://leafletjs.com/) pour la cartographie
-- [Chart.js](https://www.chartjs.org/) pour les graphiques
-- [Font Awesome](https://fontawesome.com/) pour les icônes
+---
 
-## Licence
+## 2. Export Kobo → CSV
 
-Projet interne — à adapter selon vos besoins.
+Le script :
+
+```text
+backend/kobo/kobo_export.py
+```
+
+récupère les données depuis KoboToolbox
