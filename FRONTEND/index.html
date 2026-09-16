@@ -48,6 +48,178 @@
   ========================== -->
   <link rel="stylesheet" href="style.css">
 
+  <!-- =========================
+       STYLE — MODALE ACCÈS ADMIN
+       (scindé du fichier style.css pour rester autonome)
+  ========================== -->
+  <style>
+
+    #adminAuthOverlay.active{
+      backdrop-filter: blur(6px) saturate(1.1);
+      background: rgba(20,15,5,.5);
+    }
+
+    #adminAuthOverlay .modal.admin-auth-modal{
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(20,15,5,.35), 0 6px 18px rgba(20,15,5,.18);
+      animation: adminAuthPop .32s cubic-bezier(.2,.9,.3,1.2);
+      border: none;
+    }
+
+    @keyframes adminAuthPop{
+      from{ opacity:0; transform:translateY(14px) scale(.96); }
+      to{ opacity:1; transform:translateY(0) scale(1); }
+    }
+
+    .admin-auth-modal.shake{
+      animation: adminAuthShake .4s;
+    }
+
+    @keyframes adminAuthShake{
+      0%,100%{ transform:translateX(0); }
+      20%{ transform:translateX(-8px); }
+      40%{ transform:translateX(7px); }
+      60%{ transform:translateX(-5px); }
+      80%{ transform:translateX(3px); }
+    }
+    .admin-auth-head .detail-close{
+      background: rgba(255,255,255,.25);
+      color: #fff;
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s ease;
+    }
+
+    .admin-auth-head .detail-close:hover{
+      background: rgba(255,255,255,.4);
+    }
+
+    .admin-auth-body{
+      padding: 0 28px 20px;
+      text-align: center;
+      margin-top: -26px;
+    }
+
+    .admin-auth-icon{
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      line-height: 1;
+      color: #b8912e;
+      box-shadow: 0 8px 20px rgba(20,15,5,.25);
+      border: 3px solid #fff;
+    }
+
+    #adminAuthTitle{
+      font-size: 21px;
+      margin: 0 0 6px;
+    }
+
+    .admin-auth-sub{
+      font-size: 13px;
+      color: var(--ink-soft,#5c5335);
+      margin: 0 0 22px;
+      line-height: 1.5;
+    }
+
+    .admin-auth-field{
+      text-align: left;
+      margin-bottom: 4px;
+    }
+
+    .admin-auth-input-wrap{
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .admin-auth-input-wrap i.fa-lock{
+      position: absolute;
+      left: 14px;
+      color: var(--muted,#9a8c5c);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .admin-auth-input-wrap input{
+      width: 100%;
+      padding: 12px 42px 12px 38px !important;
+      border-radius: 10px;
+    }
+
+    .admin-auth-toggle{
+      position: absolute;
+      right: 6px;
+      background: none;
+      border: none;
+      color: var(--muted,#9a8c5c);
+      cursor: pointer;
+      padding: 7px 9px;
+      border-radius: 7px;
+      transition: color .15s ease, background .15s ease;
+    }
+
+    .admin-auth-toggle:hover{
+      color: var(--ink-soft,#5c5335);
+      background: rgba(0,0,0,.05);
+    }
+
+    .admin-auth-foot{
+      padding: 14px 30px 28px !important;
+      justify-content: center !important;
+      gap: 10px;
+    }
+
+    .admin-auth-submit{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--amber,#d4af37), #b8912e) !important;
+      border: none !important;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .admin-auth-submit:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(184,145,46,.4);
+    }
+
+    #adminAuthMsg.err{
+      color: #ce1126;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* =========================================================
+       ÉTAT VIDE DE LA CARTE — centré au milieu de la zone carte
+       (plutôt qu'en haut à gauche, sous le bouton "Filtres")
+    ========================================================= */
+
+    #mapEmptyState{
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      right: auto !important;
+      bottom: auto !important;
+      transform: translate(-50%, -50%) !important;
+      margin: 0 !important;
+      width: min(92%, 480px);
+      z-index: 500;
+    }
+
+  </style>
+
 </head>
 
 <body>
@@ -327,7 +499,7 @@
         </strong>
 
         <span>
-          Depuis PostgreSQL
+          Depuis un fichier CSV importé
         </span>
 
       </div>
@@ -369,7 +541,7 @@
         </strong>
 
         <span>
-          PostgreSQL
+          Fichier CSV
         </span>
 
       </div>
@@ -437,7 +609,7 @@
     <span class="led"></span>
 
     <span id="statusText">
-      Connexion PostgreSQL...
+      Aucun fichier importé
     </span>
 
   </div>
@@ -658,11 +830,11 @@
 
       <p>
 
-        Les données du portail sont récupérées
-        depuis PostgreSQL via l'API du serveur.
+        Les données du portail proviennent d'un fichier CSV
+        importé manuellement.
 
-        L'administrateur peut actualiser les données
-        depuis le panneau de gestion.
+        L'administrateur peut importer ou remplacer le fichier
+        depuis le panneau de gestion des données.
 
       </p>
 
@@ -1602,7 +1774,7 @@
 
 
 <!-- =========================================================
-     MODAL ADMIN — POSTGRESQL
+     MODAL ADMIN — IMPORT DE FICHIER
 ========================================================= -->
 
 <div
@@ -1647,8 +1819,8 @@
 
       <p class="note">
 
-        Les données affichées par le portail proviennent
-        directement de PostgreSQL via l'API Node.js.
+        Les données affichées par le portail proviennent d'un
+        fichier CSV importé manuellement depuis votre ordinateur.
 
       </p>
 
@@ -1659,8 +1831,8 @@
           Source :
         </strong>
 
-        PostgreSQL — base
-        <code>ecoles_bamako</code>
+        Fichier CSV local — colonnes attendues :
+        <code>id_ecole, nom_ecole, type_ecole, ...</code>
 
       </p>
 
@@ -1670,7 +1842,7 @@
       <div class="field">
 
         <label>
-          État de la connexion
+          État de l'import
         </label>
 
         <div
@@ -1679,7 +1851,7 @@
           role="status"
           aria-live="polite">
 
-          Vérification de la connexion...
+          Aucun fichier importé pour l'instant.
 
         </div>
 
@@ -1691,7 +1863,7 @@
       <div class="field">
 
         <label>
-          Nombre d'écoles disponibles
+          Nombre d'écoles chargées
         </label>
 
         <div
@@ -1709,7 +1881,7 @@
 
       <div class="subhead">
 
-        Données disponibles
+        Colonnes attendues dans le fichier CSV
 
       </div>
 
@@ -1804,7 +1976,7 @@
           id="btnTestPostgres"
           type="button">
 
-          Tester la connexion
+          Choisir un fichier CSV
 
         </button>
 
@@ -1814,7 +1986,7 @@
           id="btnRefreshPostgres"
           type="button">
 
-          Actualiser
+          Réimporter / remplacer
 
         </button>
 
@@ -1824,7 +1996,7 @@
           id="btnDownloadPostgres"
           type="button">
 
-          Télécharger les données
+          Télécharger les données (CSV)
 
         </button>
 
@@ -1847,19 +2019,14 @@
 
 
   <div
-    class="modal"
-    style="width:360px;"
+    class="modal admin-auth-modal"
+    style="width:380px;"
     role="dialog"
     aria-modal="true"
     aria-labelledby="adminAuthTitle">
 
 
-    <div class="modal-head">
-
-      <h2 id="adminAuthTitle">
-        Accès administrateur
-      </h2>
-
+    <div class="modal-head admin-auth-head">
 
       <span
         class="detail-close"
@@ -1875,19 +2042,50 @@
     </div>
 
 
-    <div class="modal-body">
+    <div class="modal-body admin-auth-body">
 
-      <div class="field">
+      <div class="admin-auth-icon" aria-hidden="true">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+
+      <h2 id="adminAuthTitle">
+        Accès administrateur
+      </h2>
+
+      <p class="admin-auth-sub">
+        Saisissez le mot de passe pour gérer les données
+        et paramètres du portail.
+      </p>
+
+      <div class="field admin-auth-field">
 
         <label for="adminPasswordInput">
           Mot de passe
         </label>
 
-        <input
-          type="password"
-          id="adminPasswordInput"
-          placeholder="Mot de passe administrateur"
-          autocomplete="off">
+        <div class="admin-auth-input-wrap">
+
+          <i class="fa-solid fa-lock"></i>
+
+          <input
+            type="password"
+            id="adminPasswordInput"
+            placeholder="Mot de passe administrateur"
+            autocomplete="new-password"
+            spellcheck="false">
+
+          <button
+            type="button"
+            class="admin-auth-toggle"
+            id="btnToggleAdminPassword"
+            tabindex="-1"
+            aria-label="Afficher le mot de passe">
+
+            <i class="fa-solid fa-eye"></i>
+
+          </button>
+
+        </div>
 
       </div>
 
@@ -1902,7 +2100,7 @@
     </div>
 
 
-    <div class="modal-foot">
+    <div class="modal-foot admin-auth-foot">
 
       <button
         class="btn ghost"
@@ -1914,9 +2112,10 @@
 
 
       <button
-        class="btn primary"
+        class="btn primary admin-auth-submit"
         id="btnAdminAuthSubmit">
 
+        <i class="fa-solid fa-arrow-right-to-bracket"></i>
         Entrer
 
       </button>
@@ -1957,11 +2156,16 @@
 </script>
 
 
+<!-- =========================================================
+     FIREBASE (stockage partagé des données importées)
+========================================================= -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+
 <!-- SCRIPT PRINCIPAL -->
-
-<script src="script.js"></script>
-
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
 </body>
 </html>
-

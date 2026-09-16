@@ -1,21 +1,18 @@
-# Node.js
-node_modules/
-**/node_modules/
-
-# Variables d'environnement
-.env
-**/.env
+# Secrets
+backend/.env
 
 # Python
 __pycache__/
 *.pyc
+.venv/
+venv/
 
-# VS Code
-.vscode/
+# Données locales
+backend/kobo/ecoles_bamako.csv
 
 # Logs
 *.log
 
-# Fichiers système
+# Système
 .DS_Store
 Thumbs.db

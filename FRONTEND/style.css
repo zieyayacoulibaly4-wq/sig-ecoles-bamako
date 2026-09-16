@@ -2726,3 +2726,296 @@ thead th:hover{ background:var(--border); }
   .map-opt-btn:nth-child(2)::after{ animation:none; }
   .map-opt-btn{ transition:none; }
 }
+/* =========================================================
+   PATCH — Filtres invisibles en mode mobile
+   showPanel()/hidePanel() (script.js) posent/enlèvent la
+   classe "active", pas "show-mobile" comme le prévoyait la
+   media query mobile d'origine. On aligne le CSS sur la
+   classe réellement utilisée par le script.
+   ========================================================= */
+@media (max-width: 760px){
+  #panel-filters.active{
+    display:flex;
+    animation:panelEnter .2s cubic-bezier(.22,1,.36,1) both;
+  }
+  /* Cache le bouton flottant "Filtres" pendant que le panneau
+     est ouvert (la règle body.filters-open d'origine ne se
+     déclenchait jamais, car aucune classe de ce nom n'est
+     posée sur <body> par le script). */
+  body:has(#panel-filters.active) #btnOpenFilters{
+    display:none;
+  }
+}
+
+/* =========================================================
+   PATCH 11 — Tableau des établissements : visible et
+   défilant horizontalement sur TOUS les écrans, y compris
+   les téléphones où il n'apparaissait pas du tout.
+
+   Cause du bug : #drawerBodyTable n'avait pas de règle de
+   défilement propre à lui (seul .drawer-body l'avait, et
+   uniquement dans le media query <=760px) ; par ailleurs, sur
+   iOS Safari, un empilement position:fixed + height:auto
+   + calc(100% - 50px) peut se résoudre à une hauteur de 0,
+   ce qui rend le tableau invisible même s'il existe dans le
+   DOM. On fixe donc la hauteur du tiroir en dvh explicitement
+   et on force le défilement sur le conteneur exact du tableau.
+   ========================================================= */
+
+#drawerBodyTable{
+  display:block;
+  width:100%;
+  overflow-x:auto;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  min-height:0;
+}
+
+#dataTable{
+  width:100%;
+  min-width:680px;
+  border-collapse:collapse;
+}
+
+/* Sécurise la hauteur du tiroir plein écran (mode "Tableau" /
+   "Stats") sur mobile : dvh explicite au lieu de calc(100% - Xpx)
+   imbriqué dans une chaîne de parents en position:fixed. */
+@media (max-width:760px){
+  #drawer.open{
+    height:100dvh !important;
+    max-height:100dvh !important;
+  }
+  #drawer.open .drawer-head{
+    min-height:50px;
+  }
+  #drawer.open .drawer-body{
+    height:calc(100dvh - 50px) !important;
+  }
+  #drawerBodyTable{
+    height:100%;
+  }
+}
+
+/* Sur très petits écrans, on resserre le tableau : le défilement
+   horizontal prend le relais si besoin, mais on limite déjà la
+   casse pour qu'une bonne partie tienne sans scroller. */
+@media (max-width:480px){
+  #dataTable{
+    min-width:600px;
+    font-size:10.5px;
+  }
+  #dataTable thead th,
+  #dataTable tbody td{
+    padding:6px 7px;
+  }
+}
+
+/* =========================================================
+   PATCH 12 — Pagination du tableau des établissements
+   Ajoutée pour que le tableau reste rapide et lisible même
+   avec des milliers d'écoles : au lieu de générer toutes les
+   lignes d'un coup, seule la page courante est affichée.
+   (#tablePagination est créé dynamiquement par app.js dans
+   #drawerBodyTable, juste après le tableau.)
+   ========================================================= */
+
+#tablePagination{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:12px;
+  padding-top:12px;
+  border-top:1px solid var(--border);
+  font-family:var(--font-mono);
+}
+
+#tablePagination:empty{
+  display:none;
+  margin:0;
+  padding:0;
+  border:0;
+}
+
+.pagination-info{
+  font-size:11px;
+  color:var(--muted);
+  white-space:nowrap;
+}
+
+.pagination-controls{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.pagination-page{
+  font-size:11.5px;
+  color:var(--ink-soft);
+  padding:0 6px;
+  white-space:nowrap;
+}
+
+.pagination-size{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--ink-soft);
+  background:var(--surface-alt);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:6px 8px;
+  cursor:pointer;
+}
+.pagination-size:focus-visible{
+  outline:2px solid var(--teal-dim);
+  outline-offset:2px;
+}
+
+@media (max-width:760px){
+  #tablePagination{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .pagination-controls{
+    justify-content:center;
+  }
+  .pagination-info{
+    text-align:center;
+  }
+}
+@media (max-width: 760px){
+  #panel-route{
+    transform: none !important;
+  }
+}
+/* =========================================================
+   PATCH — REFONTE ACCUEIL : CINÉMATIQUE VISIBLE + DESIGN PREMIUM
+ ========================================================= */
+
+#homeScreen{ background:#05070c; }
+
+/* Vidéo pleinement visible et lumineuse */
+#homeScreen .cinematic-video{
+  opacity:1 !important;
+  filter:brightness(.88) contrast(1.12) saturate(1.08) !important;
+  animation:cinematicZoom 24s ease-in-out infinite alternate;
+}
+@keyframes cinematicZoom{
+  from{ transform:scale(1); }
+  to{ transform:scale(1.07); }
+}
+
+#homeScreen .home-bg-fallback{
+  background:linear-gradient(160deg,#05070c,#11141c);
+}
+
+/* Voile très allégé : juste un vignettage haut/bas/gauche pour la
+   lisibilité, la vidéo reste au premier plan visuellement */
+#homeScreen .home-bg::after{
+  background:
+    linear-gradient(180deg, rgba(5,7,12,.72) 0%, rgba(5,7,12,.08) 32%, rgba(5,7,12,.3) 68%, rgba(5,7,12,.88) 100%),
+    linear-gradient(90deg, rgba(5,7,12,.5) 0%, rgba(5,7,12,0) 48%);
+}
+
+/* ---- Header : verre flottant sur la vidéo ---- */
+#homeScreen .home-header{
+  background:rgba(10,12,18,.32);
+  border-bottom:1px solid rgba(212,175,55,.25);
+  backdrop-filter:blur(14px) saturate(1.2);
+}
+#homeScreen .home-logo{ border-right-color:rgba(212,175,55,.25); }
+#homeScreen .home-logo .wordmark{ color:#fdfaf1; }
+#homeScreen .home-logo .wordmark::after{ color:#d4af37; }
+
+#homeScreen .home-nav-links button{ color:rgba(253,250,241,.72); }
+#homeScreen .home-nav-links button:hover,
+#homeScreen .home-nav-links button.active{ color:#fdfaf1; }
+
+#homeScreen .home-cta-desktop button{
+  color:#fdfaf1;
+  border-color:rgba(212,175,55,.45);
+  background:rgba(255,255,255,.06);
+}
+#homeScreen .home-cta-desktop #homeModeIndicator.is-admin{
+  background:rgba(212,175,55,.22); border-color:rgba(212,175,55,.7);
+}
+#homeScreen .home-cta-desktop #homeAdminLink{
+  background:#d4af37; color:#1a1406; border-color:#d4af37;
+}
+#homeScreen .home-cta-desktop #homeAdminLink:hover{
+  background:transparent; color:#d4af37;
+}
+#homeScreen .home-burger span{ background:#fdfaf1; }
+#homeScreen .home-mobile-menu{ background:rgba(5,7,12,.94); }
+#homeScreen .home-mobile-menu button{ color:#fdfaf1; }
+#homeScreen .home-mobile-menu .mm-admin{ border-color:rgba(212,175,55,.55); color:#d4af37; }
+
+/* ---- Contenu hero : texte blanc/or lisible sur la vidéo ---- */
+#homeScreen .home-eyebrow{
+  color:#fdfaf1;
+  border-color:rgba(212,175,55,.6);
+  background:rgba(255,255,255,.07);
+  backdrop-filter:blur(6px);
+}
+
+#homeScreen .home-headline{
+  color:#ffffff;
+  text-shadow:0 4px 30px rgba(0,0,0,.6), 0 1px 0 rgba(0,0,0,.35);
+}
+#homeScreen .home-headline .cursor{ background:#d4af37; box-shadow:0 0 10px rgba(212,175,55,.8); }
+
+#homeScreen .home-desc{
+  color:rgba(253,250,241,.88);
+  text-shadow:0 2px 14px rgba(0,0,0,.55);
+}
+
+#homeScreen .home-cta-row .btn.ghost-home{
+  color:#fdfaf1;
+  border-color:rgba(253,250,241,.55);
+}
+#homeScreen .home-cta-row .btn.ghost-home:hover{
+  background:rgba(255,255,255,.14); color:#fdfaf1;
+}
+#homeScreen .home-cta-row .btn:not(.ghost-home){
+  box-shadow:0 8px 26px rgba(212,175,55,.35);
+}
+
+/* ---- Barre du bas : cartes en verre flottant sur la vidéo ---- */
+#homeScreen .home-bottom-bar{
+  background:rgba(10,12,18,.42);
+  border-color:rgba(212,175,55,.32);
+  backdrop-filter:blur(16px) saturate(1.2);
+  box-shadow:0 -10px 40px rgba(0,0,0,.4), 0 20px 50px rgba(0,0,0,.25);
+}
+#homeScreen .home-bottom-item{ border-right-color:rgba(212,175,55,.22); }
+#homeScreen .home-bottom-item div strong{ color:#fdfaf1; }
+#homeScreen .home-bottom-item div span{ color:rgba(253,250,241,.62); }
+#homeScreen .home-bottom-item:hover{ background:rgba(212,175,55,.14); }
+
+/* ---- Entrée en fondu du contenu, effet "cinéma" ---- */
+@keyframes heroFadeUp{
+  from{ opacity:0; transform:translateY(18px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+#homeScreen .home-eyebrow{ animation:heroFadeUp .6s cubic-bezier(.22,1,.36,1) both; }
+#homeScreen .home-headline{ animation:heroFadeUp .7s .08s cubic-bezier(.22,1,.36,1) both; }
+#homeScreen .home-desc{ animation:heroFadeUp .7s .16s cubic-bezier(.22,1,.36,1) both; }
+#homeScreen .home-cta-row{ animation:heroFadeUp .7s .24s cubic-bezier(.22,1,.36,1) both; }
+#homeScreen .home-bottom-bar{ animation:heroFadeUp .7s .32s cubic-bezier(.22,1,.36,1) both; }
+
+/* ---- Mobile : vidéo bien visible aussi, léger assombrissement seulement ---- */
+@media (max-width:760px){
+  #homeScreen .cinematic-video{
+    opacity:.9 !important;
+    filter:brightness(.78) contrast(1.1) saturate(1.05) !important;
+    animation:none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  #homeScreen .cinematic-video{ animation:none !important; }
+  #homeScreen .home-eyebrow, #homeScreen .home-headline, #homeScreen .home-desc,
+  #homeScreen .home-cta-row, #homeScreen .home-bottom-bar{ animation:none !important; }
+}
