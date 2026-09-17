@@ -411,10 +411,6 @@ function updateKPIs() {
   const communes = new Set(rows.map(e => e.commune).filter(Boolean)).size;
   const rate = total > 0 ? Math.round(functional * 100 / total) : 0;
 
-  setText("kpiTotal", formatNumber(total));
-  setText("kpiEffectif", formatNumber(students));
-  setText("kpiFonctionnel", rate + "%");
-  setText("kpiCommunes", formatNumber(communes));
   setText("filterCount", formatNumber(rows.length) + " / " + formatNumber(STATE.raw.length));
 
   updateFlagStrip();
@@ -854,9 +850,19 @@ function createSchoolMarker(school) {
     </div>
   `);
 
-  marker.on("popupopen", () => {
-    const popup = document.querySelector(".popup-detail-btn");
-    if (popup) { popup.addEventListener("click", () => { openSchoolDetail(school); }); }
+  // Clic direct sur le marqueur → affiche immédiatement la fiche détaillée
+  // de l'école, sans devoir d'abord ouvrir la bulle puis cliquer sur le
+  // bouton "Voir le détail".
+  marker.on("click", () => { openSchoolDetail(school); });
+
+  // Le bouton "Voir le détail" à l'intérieur du popup reste fonctionnel
+  // lui aussi. On limite la recherche à l'élément du popup qui vient de
+  // s'ouvrir (event.popup.getElement()) plutôt qu'à tout le document,
+  // pour éviter de cibler par erreur le bouton d'un autre popup.
+  marker.on("popupopen", event => {
+    const popupEl = event.popup.getElement();
+    const button = popupEl ? popupEl.querySelector(".popup-detail-btn") : null;
+    if (button) { button.addEventListener("click", () => { openSchoolDetail(school); }); }
   });
 
   return marker;
