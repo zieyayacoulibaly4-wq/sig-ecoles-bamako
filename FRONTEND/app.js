@@ -908,7 +908,7 @@ function buildSchoolDetailGrid(school) {
     <div class="detail-grid">
       <div class="detail-item"><strong>ID</strong><span>${escapeHtml(school.id_ecole)}</span></div>
       <div class="detail-item"><strong>Type</strong><span><span class="badge ${badgeClass(school.type_ecole)}">${escapeHtml(school.type_ecole)}</span></span></div>
-      <div class="detail-item"><strong>Niveau</strong><span>${escapeHtml(school.niveau)}</span></div>
+      <div class="detail-item"><strong>Niveau</strong><span>${escapeHtml(afficherNiveau(school.niveau))}</span></div>
       <div class="detail-item"><strong>Statut</strong><span class="${isFunctional(school) ? "stat-ok" : "stat-bad"}">${escapeHtml(school.statut_fonctionnement)}</span></div>
       <div class="detail-item"><strong>Commune</strong><span>${escapeHtml(formatCommuneLabel(school.commune))}</span></div>
       <div class="detail-item"><strong>Quartier</strong><span>${escapeHtml(school.quartier)}</span></div>
@@ -1244,6 +1244,8 @@ function niveauColor(niveau) {
   if (value.includes("fondamental")) return "#3d7ea6";
   if (value.includes("secondaire")) return "#b8912e";
   if (value.includes("technique")) return "#7b6aa8";
+  if (value.includes("pr_scolaire") || value.includes("prescolaire")) return "#6ba86a";
+  if (value.includes("universite")) return "#6ba86a";
   return "#8b8b8b";
 }
 
@@ -1328,13 +1330,19 @@ function drawAllCharts() {
   drawChart("chartClassesCommune", "bar", Object.keys(classesCommune).map(formatCommuneLabel), Object.values(classesCommune), getVar("--red-dim") || "#8a6a1a");
 
   const niveaux = groupCount("niveau");
-  drawChart("chartNiveau", "doughnut", Object.keys(niveaux), Object.values(niveaux), Object.keys(niveaux).map(niveauColor));
+  drawChart("chartNiveau", "doughnut", Object.keys(niveaux).map(afficherNiveau), Object.values(niveaux), Object.keys(niveaux).map(niveauColor));
 
   const niveauStudents = groupSum("niveau", "effectif_total");
-  drawChart("chartNiveauEff", "bar", Object.keys(niveauStudents), Object.values(niveauStudents), Object.keys(niveauStudents).map(niveauColor));
+  drawChart("chartNiveauEff", "bar", Object.keys(niveauStudents).map(afficherNiveau), Object.values(niveauStudents), Object.keys(niveauStudents).map(niveauColor));
 
 }
-
+/* ===== Affichage niveau ===== */
+function afficherNiveau(niveau) {
+    if (niveau === "pr_scolaire") {
+        return "Préscolaire";
+    }
+    return niveau;
+}
 function renderRanking() {
 
   const container = document.getElementById("rankCommunes");
